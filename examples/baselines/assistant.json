@@ -1,0 +1,78 @@
+{
+  "suite": "assistant",
+  "agent": "demo:v1",
+  "cases": {
+    "division_by_zero_is_handled": {
+      "text": "Sorry, I could not calculate that.",
+      "tool_calls": [
+        {
+          "name": "calculator",
+          "arguments": {
+            "expression": "1 / 0"
+          }
+        }
+      ]
+    },
+    "division_keeps_decimals": {
+      "text": "The result is 2.50.",
+      "tool_calls": [
+        {
+          "name": "calculator",
+          "arguments": {
+            "expression": "10 / 4"
+          }
+        }
+      ]
+    },
+    "km_to_miles": {
+      "text": "10 km is 6.21 miles.",
+      "tool_calls": [
+        {
+          "name": "unit_converter",
+          "arguments": {
+            "value": 10.0,
+            "from": "km",
+            "to": "miles"
+          }
+        }
+      ]
+    },
+    "order_lookup_returns_json": {
+      "text": "{\"order_id\": 42, \"status\": \"shipped\", \"items\": 3}",
+      "tool_calls": [
+        {
+          "name": "order_lookup",
+          "arguments": {
+            "order_id": 42
+          }
+        }
+      ]
+    },
+    "out_of_scope_request": {
+      "text": "Sorry, I can only help with calculations, unit conversions and order lookups.",
+      "tool_calls": []
+    },
+    "simple_addition": {
+      "text": "The result is 5.",
+      "tool_calls": [
+        {
+          "name": "calculator",
+          "arguments": {
+            "expression": "2 + 3"
+          }
+        }
+      ]
+    },
+    "unknown_order": {
+      "text": "{\"error\": \"order not found\"}",
+      "tool_calls": [
+        {
+          "name": "order_lookup",
+          "arguments": {
+            "order_id": 999
+          }
+        }
+      ]
+    }
+  }
+}
