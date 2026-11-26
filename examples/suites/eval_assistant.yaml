@@ -1,0 +1,71 @@
+# Example suite for the built-in demo agent.
+# Each case sends one prompt and lists the checks its answer must pass.
+# On top of the checks, every response is compared with the recorded baseline
+# in examples/baselines/assistant.json to catch behaviour changes.
+name: assistant
+system_prompt: >
+  You are a helpful assistant that answers calculations, unit conversions and
+  order status questions. Use the available tools.
+
+defaults:
+  baseline: similarity
+  threshold: 0.9
+
+cases:
+  - id: simple_addition
+    prompt: What is 2 + 3?
+    tags: [math, smoke]
+    checks:
+      - tool_called: calculator
+      - contains: "5"
+      - max_chars: 80
+
+  - id: division_keeps_decimals
+    prompt: Calculate 10 / 4
+    tags: [math]
+    checks:
+      - tool_called: calculator
+      - contains: "2.50"
+
+  - id: division_by_zero_is_handled
+    prompt: What is 1 / 0?
+    tags: [math, robustness]
+    checks:
+      - contains: sorry
+      - not_contains: Traceback
+
+  - id: km_to_miles
+    prompt: Please convert 10 km to miles.
+    tags: [conversion]
+    checks:
+      - tool_called: unit_converter
+      - regex: '6\.21 miles'
+
+  - id: order_lookup_returns_json
+    prompt: What is the status of order 42?
+    tags: [orders, smoke]
+    baseline: exact
+    checks:
+      - tool_called: order_lookup
+      - json_schema:
+          type: object
+          required: [order_id, status]
+          properties:
+            order_id: {type: integer}
+            status: {enum: [processing, shipped, delivered]}
+
+  - id: unknown_order
+    prompt: Where is order 999?
+    tags: [orders, robustness]
+    checks:
+      - json_schema:
+          type: object
+          required: [error]
+
+  - id: out_of_scope_request
+    prompt: Write me a poem about the sea.
+    tags: [scope, smoke]
+    checks:
+      - no_tool_called: true
+      - contains: sorry
+      - max_latency_s: 1.0
